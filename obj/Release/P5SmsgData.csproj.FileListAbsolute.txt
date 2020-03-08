@@ -1,0 +1,12 @@
+C:\Users\death\source\repos\P5SmsgData\bin\Release\P5SmsgData.exe.config
+C:\Users\death\source\repos\P5SmsgData\bin\Release\P5SmsgData.exe
+C:\Users\death\source\repos\P5SmsgData\bin\Release\P5SmsgData.pdb
+C:\Users\death\source\repos\P5SmsgData\bin\Release\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\death\source\repos\P5SmsgData\bin\Release\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.csprojAssemblyReference.cache
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.Form1.resources
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.Properties.Resources.resources
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.csproj.GenerateResource.cache
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.csproj.CopyComplete
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.exe
+C:\Users\death\source\repos\P5SmsgData\obj\Release\P5SmsgData.pdb
