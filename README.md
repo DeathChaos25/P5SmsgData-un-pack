@@ -1,2 +1,5 @@
 # P5SmsgData-un-pack
 really shitty msgData (0.bin inside LINKDATA) un/packer for Persona 5 Scramble
+
+Makes use of (an earlier version of) Amicitia.IO from TGEnigma.
+https://github.com/TGEnigma/Amicitia.IO
