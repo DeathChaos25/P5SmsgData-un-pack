@@ -18,143 +18,115 @@ namespace P5SmsgData
             InitializeComponent();
         }
         private msgDataFile currentmsgData;
-        public ushort numOfmsgDataPointers { get; set; }
         public uint msgDataPointer { get; set; }
         public List<String> msgDataStrings { get; private set; }
         public string[] readText { get; private set; }
-        public string filePath { get; set; }
         public string nameOfFile { get; set; }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void btnOpenFile_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            using (OpenFileDialog dialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "0.bin/0.txt (*.bin, *.txt)|*.bin;*.txt|All files (*.*)|*.*";
-                openFileDialog.FilterIndex = 1;
-                openFileDialog.RestoreDirectory = true;
-                openFileDialog.Title = "open msgData.bin (0.bin) or a converted text file";
+                dialog.Filter = "0.bin/0.txt (*.bin, *.txt)|*.bin;*.txt|All files (*.*)|*.*";
+                dialog.FilterIndex = 1;
+                dialog.RestoreDirectory = true;
+                dialog.Title = "open msgData.bin (0.bin) or a converted text file";
 
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    //Get the path of specified file
-                    filePath = openFileDialog.FileName;
-                    nameOfFile = Path.GetFileName(filePath);
-                    var fileExtension = Path.GetExtension(filePath);
-
-                    if (fileExtension == ".bin" || fileExtension == ".BIN")
-                    {
-                        savebinToolStripMenuItem.Visible = false;
-                        savebinToolStripMenuItem.Enabled = false;
-
-                        savetxtToolStripMenuItem.Visible = true;
-                        savetxtToolStripMenuItem.Enabled = true;
-
-                        //Read the contents of the file into a stream
-                        var fileStream = openFileDialog.OpenFile();
-                        currentmsgData = new msgDataFile();
-                        currentmsgData.ReadmsgData(fileStream);
-
-                        txtArrayListBox.Items.Clear();
-                        txtArrayListBox.Enabled = false;
-                        txtArrayListBox.Visible = false;
-
-                        stringsListBox.Enabled = true;
-                        stringsListBox.Visible = true;
-
-                        int k = 0;
-                        foreach (var entry in currentmsgData.msgDataMessages)
-                        {
-                            stringsListBox.Items.Add("String #" + k);
-                            k++;
-                        }
-                    }
-                    else if (fileExtension == ".txt" || fileExtension == ".TXT")
-                    {
-                        savebinToolStripMenuItem.Visible = true;
-                        savebinToolStripMenuItem.Enabled = true;
-
-                        savetxtToolStripMenuItem.Visible = false;
-                        savetxtToolStripMenuItem.Enabled = false;
-
-                        string[] readText = File.ReadAllLines(filePath, Encoding.UTF8);
-                        stringsListBox.Items.Clear();
-                        stringsListBox.Enabled = false;
-                        stringsListBox.Visible = false;
-
-                        txtArrayListBox.Enabled = true;
-                        txtArrayListBox.Visible = true;
-
-                        msgDataStrings = new List<String>();
-
-                        int k = 0;
-                        foreach (string s in readText)
-                        {
-                            msgDataStrings.Add(readText[k]);
-                            txtArrayListBox.Items.Add("String #" + k);
-                            k++;
-                        }
-                    }
-                    else MessageBox.Show("This file is not a valid message binary or text file", "Invalid file");
+                    FilePathTxtBox.Text = dialog.FileName;
                 }
+                dialog.Dispose();
+            }
+        }
+        private void displayTXTBox_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Link;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+        private void displayTXTBox_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = e.Data.GetData(DataFormats.FileDrop) as string[]; // get all files droppeds  
+            if (files != null && files.Any())
+            {
+                FilePathTxtBox.Text = files.First(); //select the first one 
+                ConvertFile(files.First());
             }
         }
 
-        private void StringsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void btnLoadFile_Click(object sender, EventArgs e)
         {
-            msgDataLabel.Text = currentmsgData.msgDataMessages[stringsListBox.SelectedIndex];
-        }
-
-        private void SavetxtToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDialog1 = new SaveFileDialog())
+            if (!String.IsNullOrEmpty(FilePathTxtBox.Text))
             {
-
-                saveFileDialog1.Filter = "text file (*.txt)|*.txt|All files (*.*)|*.*";
-                saveFileDialog1.FilterIndex = 1;
-                saveFileDialog1.RestoreDirectory = true;
-
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    var savePath = saveFileDialog1.FileName;
-                    File.WriteAllLines(savePath, currentmsgData.msgDataMessages, Encoding.UTF8);
-                    MessageBox.Show("File saved to: " + savePath, "File saved");
-                }
+                ConvertFile(FilePathTxtBox.Text);
             }
         }
-
-        private void TxtArrayListBox_SelectedIndexChanged(object sender, EventArgs e)
+        public void ConvertFile(String fileToConvert)
         {
-            msgDataLabel.Text = msgDataStrings[txtArrayListBox.SelectedIndex];
-        }
+            var fileExtension = Path.GetExtension(fileToConvert);
 
-        private void savebinToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDialog1 = new SaveFileDialog())
+            if (fileExtension == ".bin" || fileExtension == ".BIN")
             {
-                saveFileDialog1.Filter = "0.bin (*.bin)|*.bin|All files (*.*)|*.*";
-                saveFileDialog1.FilterIndex = 1;
-                saveFileDialog1.RestoreDirectory = true;
+                //Read the contents of the file into a stream
+                var fileStream = File.Open(fileToConvert, FileMode.Open);
+                currentmsgData = new msgDataFile();
+                currentmsgData.ReadmsgData(fileStream);
 
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                using (SaveFileDialog saveFileDialog1 = new SaveFileDialog())
                 {
-                    var savePath = saveFileDialog1.FileName;
-                    using (EndianBinaryWriter newMsgData = new EndianBinaryWriter(File.Open(savePath, FileMode.Create, FileAccess.Write), Encoding.GetEncoding(65001), true, Endianness.Little))
+
+                    saveFileDialog1.Filter = "text file (*.txt)|*.txt|All files (*.*)|*.*";
+                    saveFileDialog1.FilterIndex = 1;
+                    saveFileDialog1.RestoreDirectory = true;
+
+                    if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                     {
-                        filePath = savePath; //now the Save File option writes here too
-                        currentmsgData = new msgDataFile();
-                        currentmsgData.WritemsgData(newMsgData, msgDataStrings);
+                        displayTXTBox.Text += "Converting binary file to .txt:\r\n" + fileToConvert + "\r\n";
+                        var savePath = saveFileDialog1.FileName;
+                        File.WriteAllLines(savePath, currentmsgData.msgDataMessages, Encoding.UTF8);
                         MessageBox.Show("File saved to: " + savePath, "File saved");
                     }
                 }
             }
-        }
+            else if (fileExtension == ".txt" || fileExtension == ".TXT")
+            {
+                string[] readText = File.ReadAllLines(fileToConvert, Encoding.UTF8);
 
-        private void Form1_Load(object sender, EventArgs e)
+                msgDataStrings = new List<String>();
+
+                int k = 0;
+                foreach (string s in readText)
+                {
+                    msgDataStrings.Add(readText[k]);
+                    k++;
+                }
+
+                using (SaveFileDialog saveFileDialog1 = new SaveFileDialog())
+                {
+                    saveFileDialog1.Filter = "0.bin (*.bin)|*.bin|All files (*.*)|*.*";
+                    saveFileDialog1.FilterIndex = 1;
+                    saveFileDialog1.RestoreDirectory = true;
+
+                    if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                    {
+                        var savePath = saveFileDialog1.FileName;
+                        using (EndianBinaryWriter newMsgData = new EndianBinaryWriter(File.Open(savePath, FileMode.Create, FileAccess.Write), Encoding.GetEncoding(65001), false, Endianness.Little))
+                        {
+                            displayTXTBox.Text += "Converting file text file to P5S message binary\r\n:" + fileToConvert + "\r\n";
+                            currentmsgData = new msgDataFile();
+                            currentmsgData.WritemsgData(newMsgData, msgDataStrings);
+                            MessageBox.Show("File saved to: " + savePath, "File saved");
+                        }
+                    }
+                }
+            }
+            else MessageBox.Show("This file is not a valid message binary or text file", "Invalid file");
+        }
+        private void displayTXTBox_Click(object sender, System.EventArgs e)
         {
-            savebinToolStripMenuItem.Visible = false;
-            savebinToolStripMenuItem.Enabled = false;
-            savetxtToolStripMenuItem.Visible = false;
-            savetxtToolStripMenuItem.Enabled = false;
+            displayTXTBox.Clear();
         }
     }
 }
