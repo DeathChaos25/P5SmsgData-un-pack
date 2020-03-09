@@ -15,6 +15,8 @@ namespace P5SmsgData
         public uint numOfPointers { get; set; }
         public List<String> msgDataMessages { get; private set; }
         public uint[] msgDataStringPointers { get; set; }
+        Encoding utf8WithoutBom = new UTF8Encoding(false);
+
 
         //There's 44500 strings
         public void ReadmsgData(Stream msgData_path)

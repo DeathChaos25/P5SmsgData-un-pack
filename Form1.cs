@@ -22,7 +22,7 @@ namespace P5SmsgData
         public List<String> msgDataStrings { get; private set; }
         public string[] readText { get; private set; }
         public string nameOfFile { get; set; }
-
+        Encoding utf8WithoutBom = new UTF8Encoding(false);
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
@@ -85,7 +85,7 @@ namespace P5SmsgData
                     {
                         displayTXTBox.Text += "Converting binary file to .txt:\r\n" + fileToConvert + "\r\n";
                         var savePath = saveFileDialog1.FileName;
-                        File.WriteAllLines(savePath, currentmsgData.msgDataMessages, Encoding.UTF8);
+                        File.WriteAllLines(savePath, currentmsgData.msgDataMessages, utf8WithoutBom);
                         MessageBox.Show("File saved to: " + savePath, "File saved");
                     }
                 }
@@ -112,7 +112,7 @@ namespace P5SmsgData
                     if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                     {
                         var savePath = saveFileDialog1.FileName;
-                        using (EndianBinaryWriter newMsgData = new EndianBinaryWriter(File.Open(savePath, FileMode.Create, FileAccess.Write), Encoding.GetEncoding(65001), false, Endianness.Little))
+                        using (EndianBinaryWriter newMsgData = new EndianBinaryWriter(File.Open(savePath, FileMode.Create, FileAccess.Write), utf8WithoutBom, false, Endianness.Little))
                         {
                             displayTXTBox.Text += "Converting file text file to P5S message binary\r\n:" + fileToConvert + "\r\n";
                             currentmsgData = new msgDataFile();
